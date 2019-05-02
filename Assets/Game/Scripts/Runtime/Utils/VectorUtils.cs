@@ -8,7 +8,8 @@ namespace Wokarol.Utils
         /// <summary>
         /// Finds closest point based on angle between targetDirection and point relative to origin in clockwise order
         /// </summary>
-        public static Vector2 FindFirstPointInClockWiseOrder(Vector2 targetDirection, Vector2 origin, Vector2[] points) {
+        public static Vector2 FindFirstPointInClockWiseOrder(Vector2 targetDirection, Vector2 origin, Vector2[] points)
+        {
             // Initialisation
             int highestPointIndex = 0;
             float highest = -180;
@@ -19,7 +20,7 @@ namespace Wokarol.Utils
                 float angle = Vector2.SignedAngle(-targetDirection, points[i] - origin);
 
                 // Updates current angle if its closer to target
-                if(angle > highest) {
+                if (angle > highest) {
                     highest = angle;
                     highestPointIndex = i;
                 }

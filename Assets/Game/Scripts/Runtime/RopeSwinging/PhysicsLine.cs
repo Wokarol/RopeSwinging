@@ -27,7 +27,8 @@ namespace Wokarol
         Stack<Anchor> previousAnchors = new Stack<Anchor>();
         Anchor currentAnchor;
 
-        public PhysicsLine(Vector2 startPosition, Vector2 lineOrigin, float edgeOffset, LayerMask groundMask) {
+        public PhysicsLine(Vector2 startPosition, Vector2 lineOrigin, float edgeOffset, LayerMask groundMask)
+        {
             // Sets variables
             EdgeOffset = edgeOffset;
             GroundMask = groundMask;
@@ -37,7 +38,8 @@ namespace Wokarol
             currentAnchor = new Anchor(lineOrigin, true);
         }
 
-        public void Tick(Vector2 lineEndPosition) {
+        public void Tick(Vector2 lineEndPosition)
+        {
             Vector2 originPos = currentAnchor.Position;
 
             // Raycasts from last anchor to current player position
@@ -103,7 +105,8 @@ namespace Wokarol
             public readonly Vector2 Position;
             public readonly bool Clockwise;
 
-            public Anchor(Vector2 position, bool clockwise) {
+            public Anchor(Vector2 position, bool clockwise)
+            {
                 Position = position;
                 Clockwise = clockwise;
             }
