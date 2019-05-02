@@ -28,13 +28,16 @@ namespace Wokarol
         }
 
         private void Start() {
+            // Creating new line
             line = new PhysicsLine(transform.position, ropeOrigin.position, edgeOffset, groundMask) {
                 DrawDebug = drawDebug
             };
 
+            // Setting starting line
             lineRenderer.positionCount = 2;
             lineRenderer.SetPosition(0, ropeOrigin.position);
 
+            // Events for anchor adding/removing
             line.AnchorAdded += a => {
                 int positionCount = lineRenderer.positionCount;
                 lineRenderer.positionCount = positionCount + 1;
