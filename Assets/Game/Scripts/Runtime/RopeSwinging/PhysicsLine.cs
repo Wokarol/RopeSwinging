@@ -6,9 +6,20 @@ namespace Wokarol
 {
     public class PhysicsLine
     {
+        public delegate void AnchorsChanged(Anchor currentAnchor);
+
         public float EdgeOffset { get; set; } = 0.05f;
         public LayerMask GroundMask { get; set; }
         public bool DrawDebug { get; set; }
+
+        /// <summary>
+        /// Called when new anchor is added
+        /// </summary>
+        public event AnchorsChanged AnchorAdded;
+        /// <summary>
+        /// Called when current anchor is removed
+        /// </summary>
+        public event AnchorsChanged AnchorRemoved;
 
         Vector2 previousPosition;
 
@@ -40,6 +51,7 @@ namespace Wokarol
                 if (currentAnchor.Clockwise == angle > 0) {
                     // Removes anchor from memory
                     currentAnchor = previousAnchors.Pop();
+                    AnchorRemoved?.Invoke(currentAnchor);
                 }
             }
 
@@ -63,6 +75,7 @@ namespace Wokarol
                 // Add new anchor to memory
                 previousAnchors.Push(currentAnchor);
                 currentAnchor = new Anchor(corner, clockwise);
+                AnchorAdded?.Invoke(currentAnchor);
             }
 
             if (DrawDebug) {

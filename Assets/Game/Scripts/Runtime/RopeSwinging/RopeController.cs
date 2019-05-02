@@ -29,6 +29,8 @@ namespace Wokarol
             line = new PhysicsLine(transform.position, ropeOrigin.position, edgeOffset, groundMask) {
                 DrawDebug = drawDebug
             };
+            line.AnchorAdded += a => Debug.Log("Added anchor");
+            line.AnchorRemoved += a => Debug.Log("Removed anchor");
         }
 
         private void FixedUpdate() {
