@@ -7,6 +7,8 @@ namespace Wokarol
 {
     public class RopeController : MonoBehaviour
     {
+        [SerializeField] LineRenderer lineRenderer;
+        [Header("Physics line settings")]
         [SerializeField] Transform ropeOrigin = default;
         [SerializeField] LayerMask groundMask = default;
         [SerializeField] float edgeOffset = 1f;
@@ -29,8 +31,22 @@ namespace Wokarol
             line = new PhysicsLine(transform.position, ropeOrigin.position, edgeOffset, groundMask) {
                 DrawDebug = drawDebug
             };
-            line.AnchorAdded += a => Debug.Log("Added anchor");
-            line.AnchorRemoved += a => Debug.Log("Removed anchor");
+
+            lineRenderer.positionCount = 2;
+            lineRenderer.SetPosition(0, ropeOrigin.position);
+
+            line.AnchorAdded += a => {
+                int positionCount = lineRenderer.positionCount;
+                lineRenderer.positionCount = positionCount + 1;
+                lineRenderer.SetPosition(positionCount - 1, a.Position);
+            };
+            line.AnchorRemoved += a => {
+                lineRenderer.positionCount -= 1;
+            };
+        }
+
+        private void Update() {
+            lineRenderer.SetPosition(lineRenderer.positionCount - 1, (Vector2)transform.position);
         }
 
         private void FixedUpdate() {
