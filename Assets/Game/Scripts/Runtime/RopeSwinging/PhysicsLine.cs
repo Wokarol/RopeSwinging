@@ -45,18 +45,6 @@ namespace Wokarol
             // Raycasts from last anchor to current player position
             RaycastHit2D hit = Physics2D.Raycast(originPos, (lineEndPosition - originPos).normalized, Vector2.Distance(originPos, lineEndPosition), GroundMask);
 
-            // Checks if last anchor should be deleted
-            if (previousAnchors.Count > 0) {
-                Anchor previousAnchor = previousAnchors.Peek();
-                Vector2 lastToCurrentAnchorPos = currentAnchor.Position - previousAnchor.Position;
-                float angle = Vector2.SignedAngle(lastToCurrentAnchorPos, lineEndPosition - currentAnchor.Position);
-                if (currentAnchor.Clockwise == angle > 0) {
-                    // Removes anchor from memory
-                    currentAnchor = previousAnchors.Pop();
-                    AnchorRemoved?.Invoke(currentAnchor);
-                }
-            }
-
             // Checks if hitted something and ands anchor in that case
             if (hit.transform != null) {
                 // Gets previous and current direction
@@ -69,7 +57,7 @@ namespace Wokarol
 
                 // Gets all corners for given collider and find correct one
                 var corners = ColliderUtils.FindCorners(originPos, hit.collider);
-                var corner = VectorUtils.FindFirstPointInClockWiseOrder(clockwise ? previousDirection : direction, originPos, corners);
+                var corner = VectorUtils.FindFirstPointInCircularOrder(previousDirection, originPos, corners, clockwise);
 
                 // Ads offset
                 corner += (corner - (Vector2)hit.transform.position).normalized * EdgeOffset;
@@ -78,7 +66,20 @@ namespace Wokarol
                 previousAnchors.Push(currentAnchor);
                 currentAnchor = new Anchor(corner, clockwise);
                 AnchorAdded?.Invoke(currentAnchor);
+            } else {
+                // Checks if last anchor should be deleted
+                if (previousAnchors.Count > 0) {
+                    Anchor previousAnchor = previousAnchors.Peek();
+                    Vector2 lastToCurrentAnchorPos = currentAnchor.Position - previousAnchor.Position;
+                    float angle = Vector2.SignedAngle(lastToCurrentAnchorPos, lineEndPosition - currentAnchor.Position);
+                    if (currentAnchor.Clockwise == angle > 0) {
+                        // Removes anchor from memory
+                        currentAnchor = previousAnchors.Pop();
+                        AnchorRemoved?.Invoke(currentAnchor);
+                    }
+                }
             }
+
 
             if (DrawDebug) {
                 // Debug Drawing
