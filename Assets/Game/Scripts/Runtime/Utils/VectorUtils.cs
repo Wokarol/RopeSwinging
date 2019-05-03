@@ -8,7 +8,7 @@ namespace Wokarol.Utils
         /// <summary>
         /// Finds closest point based on angle between targetDirection and point relative to origin in clockwise order
         /// </summary>
-        public static Vector2 FindFirstPointInCircularOrder(Vector2 targetDirection, Vector2 origin, Vector2[] points, bool clockwise)
+        public static int FindFirstPointInCircularOrder(Vector2 targetDirection, Vector2 origin, Vector2[] points, bool clockwise)
         {
             // Initialisation
             int closest = 0;
@@ -27,7 +27,7 @@ namespace Wokarol.Utils
             }
 
             // Returns result
-            return points[closest];
+            return closest;
         }
     }
 }

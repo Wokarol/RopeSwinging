@@ -35,7 +35,7 @@ namespace Wokarol
 
             // Sets previous position and first anchor
             previousPosition = startPosition;
-            currentAnchor = new Anchor(lineOrigin, true);
+            currentAnchor = new Anchor(lineOrigin, Vector2.zero, true);
         }
 
         public void Tick(Vector2 lineEndPosition)
@@ -57,14 +57,16 @@ namespace Wokarol
 
                 // Gets all corners for given collider and find correct one
                 var corners = ColliderUtils.FindCorners(originPos, hit.collider);
-                var corner = VectorUtils.FindFirstPointInCircularOrder(previousDirection, originPos, corners, clockwise);
+                var cornerIndex = VectorUtils.FindFirstPointInCircularOrder(previousDirection, originPos, corners, clockwise);
+                var corner = corners[cornerIndex];
+                Vector2 normal = ColliderUtils.FindNormal(corners[cornerIndex], cornerIndex, hit.collider);
 
                 // Ads offset
-                corner += (corner - (Vector2)hit.transform.position).normalized * EdgeOffset;
+                corner += normal * EdgeOffset;
 
                 // Add new anchor to memory
                 previousAnchors.Push(currentAnchor);
-                currentAnchor = new Anchor(corner, clockwise);
+                currentAnchor = new Anchor(corner, normal, clockwise);
                 AnchorAdded?.Invoke(currentAnchor);
             } else {
                 // Checks if last anchor should be deleted
@@ -104,11 +106,13 @@ namespace Wokarol
         public struct Anchor
         {
             public readonly Vector2 Position;
+            public readonly Vector2 Normal;
             public readonly bool Clockwise;
 
-            public Anchor(Vector2 position, bool clockwise)
+            public Anchor(Vector2 position, Vector2 normal, bool clockwise)
             {
                 Position = position;
+                Normal = normal;
                 Clockwise = clockwise;
             }
         }
