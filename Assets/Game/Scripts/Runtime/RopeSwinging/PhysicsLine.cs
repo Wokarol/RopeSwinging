@@ -40,45 +40,50 @@ namespace Wokarol
 
         public void Tick(Vector2 lineEndPosition)
         {
-            Vector2 originPos = currentAnchor.Position;
+            RaycastHit2D hit;
 
-            // Raycasts from last anchor to current player position
-            RaycastHit2D hit = Physics2D.Raycast(originPos, (lineEndPosition - originPos).normalized, Vector2.Distance(originPos, lineEndPosition), GroundMask);
+            // Loops until line of sight to player is restored
+            do {
+                Vector2 originPos = currentAnchor.Position;
 
-            // Checks if hitted something and ands anchor in that case
-            if (hit.transform != null) {
-                // Gets previous and current direction
-                Vector2 previousDirection = previousPosition - originPos;
-                Vector2 direction = lineEndPosition - originPos;
+                // Raycasts from last anchor to current player position
+                hit = Physics2D.Raycast(originPos, (lineEndPosition - originPos).normalized, Vector2.Distance(originPos, lineEndPosition), GroundMask);
 
-                // Ckecks if hit was clockwise or counter clockwise
-                float angleBetweenRays = Vector2.SignedAngle(previousDirection, direction);
-                bool clockwise = angleBetweenRays < 0;
+                // Checks if hitted something and ands anchor in that case
+                if (hit.transform != null) {
+                    // Gets previous and current direction
+                    Vector2 previousDirection = previousPosition - originPos;
+                    Vector2 direction = lineEndPosition - originPos;
 
-                // Gets all corners for given collider and find correct one
-                var corners = ColliderUtils.FindCorners(originPos, hit.collider);
-                var cornerIndex = VectorUtils.FindFirstPointInCircularOrder(previousDirection, originPos, corners, clockwise);
-                var corner = corners[cornerIndex];
-                Vector2 normal = ColliderUtils.FindNormal(corners[cornerIndex], cornerIndex, hit.collider);
+                    // Ckecks if hit was clockwise or counter clockwise
+                    float angleBetweenRays = Vector2.SignedAngle(previousDirection, direction);
+                    bool clockwise = angleBetweenRays < 0;
 
-                // Ads offset
-                corner += normal * EdgeOffset;
+                    // Gets all corners for given collider and find correct one
+                    var corners = ColliderUtils.FindCorners(originPos, hit.collider);
+                    var cornerIndex = VectorUtils.FindFirstPointInCircularOrder(previousDirection, originPos, corners, clockwise);
+                    var corner = corners[cornerIndex];
+                    Vector2 normal = ColliderUtils.FindNormal(corners[cornerIndex], cornerIndex, hit.collider);
 
-                // Add new anchor to memory
-                previousAnchors.Push(currentAnchor);
-                currentAnchor = new Anchor(corner, normal, clockwise);
-                AnchorAdded?.Invoke(currentAnchor);
-            } else {
-                // Checks if last anchor should be deleted
-                if (previousAnchors.Count > 0) {
-                    Anchor previousAnchor = previousAnchors.Peek();
-                    Vector2 lastToCurrentAnchorPos = currentAnchor.Position - previousAnchor.Position;
-                    float angle = Vector2.SignedAngle(lastToCurrentAnchorPos, lineEndPosition - currentAnchor.Position);
-                    if (currentAnchor.Clockwise == angle > 0) {
-                        // Removes anchor from memory
-                        currentAnchor = previousAnchors.Pop();
-                        AnchorRemoved?.Invoke(currentAnchor);
-                    }
+                    // Ads offset
+                    corner += normal * EdgeOffset;
+
+                    // Add new anchor to memory
+                    previousAnchors.Push(currentAnchor);
+                    currentAnchor = new Anchor(corner, normal, clockwise);
+                    AnchorAdded?.Invoke(currentAnchor);
+                }
+            } while (hit.transform != null);
+
+            // Checks if last anchor should be deleted
+            if (previousAnchors.Count > 0) {
+                Anchor previousAnchor = previousAnchors.Peek();
+                Vector2 lastToCurrentAnchorPos = currentAnchor.Position - previousAnchor.Position;
+                float angle = Vector2.SignedAngle(lastToCurrentAnchorPos, lineEndPosition - currentAnchor.Position);
+                if (currentAnchor.Clockwise == angle > 0) {
+                    // Removes anchor from memory
+                    currentAnchor = previousAnchors.Pop();
+                    AnchorRemoved?.Invoke(currentAnchor);
                 }
             }
 
