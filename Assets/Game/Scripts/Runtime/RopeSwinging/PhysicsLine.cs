@@ -44,6 +44,9 @@ namespace Wokarol
 
             // Loops until line of sight to player is restored
             do {
+                // Breaks if end position is inside a collider
+                if (Physics2D.OverlapCircle(lineEndPosition, 0.001f, GroundMask) != null) break;
+
                 Vector2 originPos = currentAnchor.Position;
 
                 // Raycasts from last anchor to current player position
