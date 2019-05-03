@@ -15,12 +15,35 @@ public class NormalDebug : MonoBehaviour
         }
     }
 
-    private void OnDrawGizmos() {
-        var corners = ColliderUtils.FindCorners(Vector2.zero, Collider);
-        var normals = ColliderUtils.FindNormals(corners, Collider);
+    [SerializeField] float distance = 2;
+    [SerializeField] [Range(0, 360 * 2)] float angle = 360;
 
-        for (int i = 0; i < corners.Length; i++) {
-            Gizmos.DrawRay(corners[i], normals[i]);
-        }
+    private void OnDrawGizmos() {
+        Vector2 from = FromAngle(angle) * distance + (Vector2)transform.position;
+        Gizmos.DrawWireSphere(from, 0.2f);
+
+        try {
+            var corners = ColliderUtils.FindCorners(from, Collider);
+
+            Gizmos.color = Color.cyan;
+            for (int i = 0; i < corners.Length; i++) {
+                Gizmos.DrawLine(from, corners[i]);
+            }
+
+            try {
+                var normals = ColliderUtils.FindNormals(corners, Collider);
+                Gizmos.color = Color.white;
+                for (int i = 0; i < normals.Length; i++) {
+                    Gizmos.DrawRay(corners[i], normals[i]);
+                }
+            } catch { }
+        } catch { }
+
+    }
+
+    Vector2 FromAngle(float angle) {
+        return new Vector2(
+            Mathf.Cos(angle * Mathf.Deg2Rad),
+            Mathf.Sin(angle * Mathf.Deg2Rad));
     }
 }

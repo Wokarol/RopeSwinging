@@ -40,8 +40,7 @@ namespace Wokarol.Utils
         /// <param name="collider">source collider</param>
         /// <returns>array of corners</returns>
         /// <exception cref="NotImplementedException">Thrown when given collider type is not supported</exception>
-        public static Vector2[] FindCorners(Vector2 origin, Collider2D collider)
-        {
+        public static Vector2[] FindCorners(Vector2 origin, Collider2D collider) {
             if (collider is BoxCollider2D) {
                 return FindCornersForBox((BoxCollider2D)collider);
             }
@@ -52,20 +51,36 @@ namespace Wokarol.Utils
         }
 
         // Corners
-        private static Vector2[] FindCornersForCircle(Vector2 from, CircleCollider2D collider)
-        {
-            throw new NotImplementedException();
+        private static Vector2[] FindCornersForCircle(Vector2 from, CircleCollider2D collider) {
+            Transform transform = collider.transform;
+            Vector2 p = transform.InverseTransformPoint(from);
+            Vector2 c = collider.offset;
+            float r = collider.radius;
+
+            Vector2 c2 = Vector2.Lerp(c, p, .5f);
+            float r2 = Vector2.Distance(c2, c);
+            float d = Vector2.Distance(c, c2);
+
+            float a = (r * r - r2 * r2 + d * d) / (2 * d);
+            Vector2 p2 = c + a * (c2 - c) / d;
+            float h = Mathf.Sqrt(r * r - a * a);
+
+            Vector2 scalledOffset = h * (c2 - c);
+
+            return new Vector2[] {
+                transform.TransformPoint(p2 + new Vector2( scalledOffset.y, -scalledOffset.x) / d),
+                transform.TransformPoint(p2 + new Vector2(-scalledOffset.y,  scalledOffset.x) / d)
+            };
         }
 
-        private static Vector2[] FindCornersForBox(BoxCollider2D collider)
-        {
+        private static Vector2[] FindCornersForBox(BoxCollider2D collider) {
             Transform transform = collider.transform;
             Vector2 size = collider.size * 0.5f; // Halfed size of collider in local space
             return new Vector2[4] {
-                transform.TransformPoint(new Vector3( size.x,  size.y)),
-                transform.TransformPoint(new Vector3( size.x, -size.y)),
-                transform.TransformPoint(new Vector3(-size.x, -size.y)),
-                transform.TransformPoint(new Vector3(-size.x,  size.y))
+                transform.TransformPoint(new Vector2( size.x,  size.y) + collider.offset),
+                transform.TransformPoint(new Vector2( size.x, -size.y) + collider.offset),
+                transform.TransformPoint(new Vector2(-size.x, -size.y) + collider.offset),
+                transform.TransformPoint(new Vector2(-size.x,  size.y) + collider.offset)
             };
         }
 
@@ -74,8 +89,9 @@ namespace Wokarol.Utils
             return collider.transform.TransformDirection(boxNormals[cornerIndex]);
         }
 
-        private static Vector2 FindNormalForCircle(CircleCollider2D collider, Vector2 vector2) {
-            throw new NotImplementedException();
+        private static Vector2 FindNormalForCircle(CircleCollider2D collider, Vector2 corner) {
+            Vector2 c = collider.transform.TransformPoint(collider.offset);
+            return (corner - c).normalized;
         }
     }
 }
